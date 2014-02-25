@@ -1,0 +1,28 @@
+{
+  "name": "ngRepeatReorder",
+  "version": "0.0.1",
+  "main": "./dist/ngRepeatReorder.js",
+  "keywords": [
+    "angular"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test*",
+    "demo*",
+    "Gruntfile.coffee",
+    "package.json",
+    "karma.conf.coffee"
+  ],
+  "dependencies": {
+    "angular": "~1.2.13",
+    "angular-hammer": "~1.x",
+    "hammerjs": "1.x"
+  },
+  "devDependencies": {
+    "bootstrap": "3.x",
+    "font-awesome": "4.x"
+  },
+  "license": "MIT"
+}
