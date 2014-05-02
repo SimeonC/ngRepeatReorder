@@ -331,6 +331,7 @@
             };
             isArrayLike = function(obj) {
               var _ref;
+              var toString = ({}).toString;
               if (obj === null || (obj && obj.document && obj.location && obj.alert && obj.setInterval)) {
                 return false;
               }
