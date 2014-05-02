@@ -252,6 +252,7 @@ module.directive 'ngRepeatReorder', [
 						if obj is null or (obj and obj.document and obj.location and obj.alert and obj.setInterval) then return false
 						length = obj.length
 						if obj.nodeType is 1 and length then return true
+						toString = ({}).toString
 						return typeof obj is 'string' or toString.call(obj) is '[object Array]' or length is 0 or typeof length is 'number' and length > 0 and (length - 1) in obj
 					if isArrayLike collection
 						collectionKeys = collection
