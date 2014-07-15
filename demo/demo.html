@@ -24,24 +24,18 @@
   width: 208px !important;
 }
 
-.form-group, {
-  float: left;
-  clear: left;
-  width: 240px;
-}
-
-input.form-control {
+input.form-control, .list-group-item {
   margin-bottom: 0;
   border-radius: 0;
   border: 1px solid #cccccc;
   border-top: none;
   padding-right: 20px;
 }
-.form-group:first-child input.form-control {
+.row .form-group:first-child input.form-control, .list-group .list-group-item:first-child {
   border-top: 1px solid #cccccc;
   border-top-radius: 4px;
 }
-.form-group:last-child input.form-control {
+.row .form-group:last-child input.form-control, .list-group .list-group-item:last-child {
   border-bottom-radius: 4px;
 }
 .ng-repeat-reorder-parent, [ng-repeat-reorder]{
@@ -52,22 +46,29 @@ input.form-control {
 	z-index: 11;
 	position: absolute;
 }
-.form-group.dragging input {
+.form-group.dragging input, .list-group .list-group-item.dragging {
   border: 1px solid #cccccc;
 }
-.form-group.dragging-after input {
+.form-group.dragging-after input, .list-group .list-group-item.dragging-after {
   background-color: green;
   border-top: 1px solid #cccccc;
 }
-.form-group.dragging-before input {
+.form-group.dragging-before input, .list-group .list-group-item.dragging-before {
   background-color: red;
 }
 
-.active-drag-below {
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
+#names > div:first-child{
+	border-bottom-left-radius: none;
+	border-bottom-right-radius: none;
+}
+
+.active-drag-below, .unselectable .list-group-item {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 </style>
@@ -82,13 +83,15 @@ input.form-control {
 		</div>
 		<div class="row" ng-controller="dragndropdemo">
 			<div id="names" class="span-3 form-inline" role="form">
-				<div class="form-group btn btn-primary">Enter Names...</div>
-				<div class="form-group has-feedback transition" ng-repeat-reorder='name in names' ng-repeat-reorder-handle="i.fa.fa-bars">
+				<div class="form-group btn btn-primary">
+					Enter Names...
+				</div>
+				<div class="form-group has-feedback transition" ng-repeat-reorder='name in names' ng-repeat-reorder-handle="i">
 					<input class="form-control form-inline player" type='text'
 						tabindex='{{$index + 1}}'
 						ng-change='checkForNameDelete($index)'
 						ng-model='name.val'
-						ng-class="{'last-player': $index == names.length-1}">
+						ng-class="{'last-player': $index == names.length-1}"/>
 					<i class="fa fa-bars form-control-feedback"></i>
 				</div>
 				<!--- tabindex logic is +1 due to 0 start of $index and then add on to start at the correct point, make sure to use tabindex='{{players.length + offset}}' on everything that gets focus after this--->
@@ -97,13 +100,17 @@ input.form-control {
 						ng-model='tempplayer'
 						tabindex='{{names.length + 1}}'
 						placeholder='Enter a name...'/>
-					</div>
 					<button ng-click="updateNames()">Add Name</button>
 				</div>
-			{{names}},{{tempplayer}}<br/>
-			<div ng-repeat='name in names'>
-				{{name}}
+				{{names}},{{tempplayer}}
 			</div>
+			<div id="names" class="span-3">
+				<div class="list-group unselectable">
+					<a class="list-group-item active">Click and drag to re-order</a>
+					<a class="list-group-item transition" ng-repeat-reorder='name in names' ng-repeat-reorder-handle="">
+						{{name.val}}<i class="fa fa-bars badge" style="display: inline-block;"></i>
+					</a>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -115,8 +122,7 @@ input.form-control {
 	<script type="text/javascript">
 		angular.module("dragndropdemo", ['ngRepeatReorder']);
 		function dragndropdemo($scope) {
-			$scope.names = [{val:'bob'},{val:'lucy'},{val:'john'},{val:'luke'},{val:'han'},{val:'lucy'},{val:'john'},{val:'luke'},{val:'han'},{val:'hanlast'}];
-			$scope.names2 = ['1', '2','3','4'];
+			$scope.names = [{val:'bob'},{val:'lucy'},{val:'john'},{val:'luke'},{val:'han'}];
 			$scope.tempplayer = '';
 			$scope.updateNames = function (){
 				if($scope.tempplayer === "") return

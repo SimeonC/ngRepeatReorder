@@ -1,19 +1,36 @@
 "use strict"
-module = angular.module 'ngRepeatReorder', ['hmTouchEvents']
+module = angular.module 'ngRepeatReorder', ['hmTouchevents']
 #sets up the events directly before repeatReorder is executed, as when it executes we no longer have access to the original html until repeats start populating which is bad performance
 #all hm events will correctly bubble if you'd like to do something cool like show a delete button with that functionality. Exception is hm-dragup, hm-dragdown and hm-drag when direction is up or down.
-module.directive 'ngRepeatReorderHandle', ->
-	transclude: false
+module.directive 'ngRepeatReorderHandle', ['$parse', ($parse) ->
+	restrict: "A"
 	priority: 999
 	terminal: false
-	compile: (element, attrs, linker) ->
-		#setup the element to have correct attributes on the drag 'handle'
-		#touch compatible events - these do nothing if you don't have angular-hammer installed, so you should. For compatability see here: https://github.com/EightMedia/hammer.js/wiki/Compatibility
-		baseElement = angular.element element[0].querySelector attrs.ngRepeatReorderHandle
+	link: (scope, element, attrs) ->
+		# setup the element to have correct attributes on the drag 'handle'
+		# touch compatible events - these do nothing if you don't have hammer.js installed. For compatability see here: https://github.com/EightMedia/hammer.js/wiki/Compatibility
+		# This code borrows from angular-hammer.js
+		bindHammer = (baseElement, eventName, actionString) ->
+			opts = $parse(attrs['hmOptions'])(scope, {})
+			fn = (event) -> scope.$apply -> $parse(actionString) scope,
+				$event: event
+			# don't create multiple Hammer instances per element
+			if !(hammer = baseElement.data 'hammer')
+				hammer = window.Hammer baseElement[0], opts
+				baseElement.data 'hammer', hammer
+			# bind Hammer touch event
+			hammer.on eventName, fn
+			# unbind Hammer touch event
+			scope.$on '$destroy', -> hammer.off eventName, fn
+		
+		if attrs.ngRepeatReorderHandle is '' then baseElement = element
+		else baseElement = element.find attrs.ngRepeatReorderHandle
 		if baseElement?
-			baseElement.attr "hm-drag", "reorderFuncs.moveevent($event, $elementRef, $index)"
-			baseElement.attr "hm-dragstart", "reorderFuncs.startevent($event, $elementRef, $index)"
-			baseElement.attr "hm-dragend", "reorderFuncs.stopevent($event, $elementRef, $index)"
+			bindHammer baseElement, "drag", "reorderFuncs.moveevent($event, $elementRef, $index)"
+			bindHammer baseElement, "dragstart", "reorderFuncs.startevent($event, $elementRef, $index)"
+			bindHammer baseElement, "dragend", "reorderFuncs.stopevent($event, $elementRef, $index)"
+]
+
 uid = ['0', '0', '0']
 module.directive 'ngRepeatReorder', [
 	"$parse"
@@ -222,9 +239,15 @@ module.directive 'ngRepeatReorder', [
 								@resetMargins()
 						#used for the start event
 						startevent: ($event, $element, $index) ->
+							console.log 'Drag START'
 							$element.parent().addClass "active-drag-below"
 							#we get the gesture ONCE then continue using it forever till the end
 							@gesture = if $event.gesture.direction is "up" or $event.gesture.direction is "down" then "vertical" else "horizontal"
+							if @gesture isnt "vertical"
+								$event.preventDefault()
+								$event.stopPropagation()
+								$event.gesture.stopPropagation()
+								return false
 							@deltaOffset = $element[0].offsetTop
 							@updateElementClass $element
 							@offset = 0
@@ -249,7 +272,7 @@ module.directive 'ngRepeatReorder', [
 							$event.preventDefault()
 					
 					isArrayLike = (obj) ->
-						if obj is null or (obj and obj.document and obj.location and obj.alert and obj.setInterval) then return false
+						if not obj? or (obj and obj.document and obj.location and obj.alert and obj.setInterval) then return false
 						length = obj.length
 						if obj.nodeType is 1 and length then return true
 						return typeof obj is 'string' or toString.call(obj) is '[object Array]' or length is 0 or typeof length is 'number' and length > 0 and (length - 1) in obj
@@ -299,8 +322,6 @@ module.directive 'ngRepeatReorder', [
 							block.scope.$destroy()
 					index = 0
 					length = collectionKeys.length
-					console.log nextBlockMap
-					console.log nextBlockOrder
 					while index < length
 						key = (if (collection is collectionKeys) then index else collectionKeys[index])
 						value = collection[key]

@@ -3,24 +3,49 @@
   var module, uid,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  module = angular.module('ngRepeatReorder', ['hmTouchEvents']);
+  module = angular.module('ngRepeatReorder', ['hmTouchevents']);
 
-  module.directive('ngRepeatReorderHandle', function() {
-    return {
-      transclude: false,
-      priority: 999,
-      terminal: false,
-      compile: function(element, attrs, linker) {
-        var baseElement;
-        baseElement = angular.element(element[0].querySelector(attrs.ngRepeatReorderHandle));
-        if (baseElement != null) {
-          baseElement.attr("hm-drag", "reorderFuncs.moveevent($event, $elementRef, $index)");
-          baseElement.attr("hm-dragstart", "reorderFuncs.startevent($event, $elementRef, $index)");
-          return baseElement.attr("hm-dragend", "reorderFuncs.stopevent($event, $elementRef, $index)");
+  module.directive('ngRepeatReorderHandle', [
+    '$parse', function($parse) {
+      return {
+        restrict: "A",
+        priority: 999,
+        terminal: false,
+        link: function(scope, element, attrs) {
+          var baseElement, bindHammer;
+          bindHammer = function(baseElement, eventName, actionString) {
+            var fn, hammer, opts;
+            opts = $parse(attrs['hmOptions'])(scope, {});
+            fn = function(event) {
+              return scope.$apply(function() {
+                return $parse(actionString)(scope, {
+                  $event: event
+                });
+              });
+            };
+            if (!(hammer = baseElement.data('hammer'))) {
+              hammer = window.Hammer(baseElement[0], opts);
+              baseElement.data('hammer', hammer);
+            }
+            hammer.on(eventName, fn);
+            return scope.$on('$destroy', function() {
+              return hammer.off(eventName, fn);
+            });
+          };
+          if (attrs.ngRepeatReorderHandle === '') {
+            baseElement = element;
+          } else {
+            baseElement = element.find(attrs.ngRepeatReorderHandle);
+          }
+          if (baseElement != null) {
+            bindHammer(baseElement, "drag", "reorderFuncs.moveevent($event, $elementRef, $index)");
+            bindHammer(baseElement, "dragstart", "reorderFuncs.startevent($event, $elementRef, $index)");
+            return bindHammer(baseElement, "dragend", "reorderFuncs.stopevent($event, $elementRef, $index)");
+          }
         }
-      }
-    };
-  });
+      };
+    }
+  ]);
 
   uid = ['0', '0', '0'];
 
@@ -296,8 +321,15 @@
                 }
               },
               startevent: function($event, $element, $index) {
+                console.log('Drag START');
                 $element.parent().addClass("active-drag-below");
                 this.gesture = $event.gesture.direction === "up" || $event.gesture.direction === "down" ? "vertical" : "horizontal";
+                if (this.gesture !== "vertical") {
+                  $event.preventDefault();
+                  $event.stopPropagation();
+                  $event.gesture.stopPropagation();
+                  return false;
+                }
                 this.deltaOffset = $element[0].offsetTop;
                 this.updateElementClass($element);
                 this.offset = 0;
@@ -331,7 +363,7 @@
             };
             isArrayLike = function(obj) {
               var _ref;
-              if (obj === null || (obj && obj.document && obj.location && obj.alert && obj.setInterval)) {
+              if ((obj == null) || (obj && obj.document && obj.location && obj.alert && obj.setInterval)) {
                 return false;
               }
               length = obj.length;
@@ -396,8 +428,6 @@
             }
             index = 0;
             length = collectionKeys.length;
-            console.log(nextBlockMap);
-            console.log(nextBlockOrder);
             while (index < length) {
               key = (collection === collectionKeys ? index : collectionKeys[index]);
               value = collection[key];

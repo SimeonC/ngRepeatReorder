@@ -33,7 +33,7 @@ module.exports = (grunt) ->
 			root: ''
 		karma:
 			unit:
-				options: testConfig 'karma.conf.js'
+				options: testConfig 'karma.conf.coffee'
 		coffee:
 			compile:
 				files:
