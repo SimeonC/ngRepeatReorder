@@ -9,7 +9,8 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-karma'
 	
 	# Default task.
-	grunt.registerTask 'default', ['coffee','test']
+	grunt.registerTask 'build', ['coffee']
+	grunt.registerTask 'default', ['build','test']
 	grunt.registerTask 'test', ['clean', 'karma', 'coverage']
 	
 	testConfig = (configFile, customOptions) ->

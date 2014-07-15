@@ -1,5 +1,5 @@
 "use strict"
-module = angular.module 'ngRepeatReorder', ['hmTouchevents']
+module = angular.module 'ngRepeatReorder', ['hmTouchEvents']
 #sets up the events directly before repeatReorder is executed, as when it executes we no longer have access to the original html until repeats start populating which is bad performance
 #all hm events will correctly bubble if you'd like to do something cool like show a delete button with that functionality. Exception is hm-dragup, hm-dragdown and hm-drag when direction is up or down.
 module.directive 'ngRepeatReorderHandle', ['$parse', ($parse) ->
