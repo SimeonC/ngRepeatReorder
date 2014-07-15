@@ -396,8 +396,7 @@
             }
             index = 0;
             length = collectionKeys.length;
-            console.log(nextBlockMap);
-            console.log(nextBlockOrder);
+            
             while (index < length) {
               key = (collection === collectionKeys ? index : collectionKeys[index]);
               value = collection[key];

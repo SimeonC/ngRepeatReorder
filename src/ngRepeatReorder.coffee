@@ -299,8 +299,7 @@ module.directive 'ngRepeatReorder', [
 							block.scope.$destroy()
 					index = 0
 					length = collectionKeys.length
-					console.log nextBlockMap
-					console.log nextBlockOrder
+					
 					while index < length
 						key = (if (collection is collectionKeys) then index else collectionKeys[index])
 						value = collection[key]
