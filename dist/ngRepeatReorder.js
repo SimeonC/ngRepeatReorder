@@ -193,7 +193,6 @@
               deltaOffset: 0,
               dragBeforeElement: '',
               dragAfterElement: '',
-              gesture: 'vertical',
               setPosition: function($element, deltaTop, deltaLeft) {
                 if (deltaTop == null) {
                   deltaTop = "";
@@ -230,13 +229,6 @@
                   _results.push(this.setMargins(c.clone));
                 }
                 return _results;
-              },
-              updateElementClass: function($element) {
-                if (this.gesture === "vertical") {
-                  return $element.addClass('dragging');
-                } else {
-                  return $element.removeClass('dragging');
-                }
               },
               updateOffset: function($event, $element, $index) {
                 var afterIndex, beforeIndex, delta, directedHeight, gDirection, halfHeight, margin, testDelta, workingDelta, workingElement;
@@ -309,29 +301,18 @@
                 }
               },
               moveevent: function($event, $element, $index) {
-                this.updateElementClass($element);
-                if (this.gesture === "vertical") {
-                  this.updateOffset($event, $element, $index);
-                  $event.preventDefault();
-                  $event.stopPropagation();
-                  $event.gesture.stopPropagation();
-                  return false;
-                } else {
-                  return this.resetMargins();
-                }
+                $element.addClass('dragging');
+                this.updateOffset($event, $element, $index);
+                $event.preventDefault();
+                $event.stopPropagation();
+                $event.gesture.stopPropagation();
+                return false;
               },
               startevent: function($event, $element, $index) {
-                console.log('Drag START');
+                $scope.$emit('ngrr-dragstart', $event, $element, $index);
                 $element.parent().addClass("active-drag-below");
-                this.gesture = $event.gesture.direction === "up" || $event.gesture.direction === "down" ? "vertical" : "horizontal";
-                if (this.gesture !== "vertical") {
-                  $event.preventDefault();
-                  $event.stopPropagation();
-                  $event.gesture.stopPropagation();
-                  return false;
-                }
                 this.deltaOffset = $element[0].offsetTop;
-                this.updateElementClass($element);
+                $element.addClass('dragging');
                 this.offset = 0;
                 this.setMargins($element, '', "-" + $element[0].offsetHeight + "px");
                 this.updateOffset($event, $element, $index);
@@ -339,6 +320,7 @@
               },
               stopevent: function($event, $element, $index) {
                 var obj;
+                $scope.$emit('ngrr-dragend', $event, $element, $index);
                 $element.parent().removeClass("active-drag-below");
                 this.resetMargins();
                 this.resetPosition($element);
@@ -356,6 +338,7 @@
                   } else if (this.offset > 0) {
                     collection.splice($index + this.offset - 1, 0, obj[0]);
                   }
+                  $scope.$emit('ngrr-reordered');
                 }
                 $element.removeClass('dragging');
                 return $event.preventDefault();

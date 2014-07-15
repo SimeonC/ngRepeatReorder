@@ -151,7 +151,6 @@ module.directive 'ngRepeatReorder', [
 						deltaOffset: 0
 						dragBeforeElement: ''
 						dragAfterElement: ''
-						gesture: 'vertical'
 						#this is used so we only detect vertical drags, this allows for swipe left to show a delete button for example
 						setPosition: ($element, deltaTop="", deltaLeft="") ->
 							$element = angular.element $element[0]
@@ -169,10 +168,6 @@ module.directive 'ngRepeatReorder', [
 							$element.css "border-top", ""
 						#reset all margins to default - ie no margins/set in css
 						resetMargins: -> @setMargins c.clone for c in nextBlockOrder
-						#shortcut to switche the dragging class on and off
-						updateElementClass: ($element) ->
-							if @gesture is "vertical" then $element.addClass 'dragging'
-							else $element.removeClass 'dragging'
 						#this function gets the offset of the mouse and manipulates the margins to reposition everything correctly
 						updateOffset: ($event, $element, $index) ->
 							@offset = 0
@@ -228,34 +223,25 @@ module.directive 'ngRepeatReorder', [
 							if afterIndex < collection.length then (dragAfterElement = nextBlockOrder[afterIndex].clone).addClass "dragging-after"
 						#to catch a move event
 						moveevent: ($event, $element, $index) ->
-							@updateElementClass $element
-							if @gesture is "vertical"
-								@updateOffset $event, $element, $index
-								$event.preventDefault()
-								$event.stopPropagation()
-								$event.gesture.stopPropagation()
-								return false
-							else
-								@resetMargins()
+							$element.addClass 'dragging'
+							@updateOffset $event, $element, $index
+							$event.preventDefault()
+							$event.stopPropagation()
+							$event.gesture.stopPropagation()
+							return false
 						#used for the start event
 						startevent: ($event, $element, $index) ->
-							console.log 'Drag START'
+							$scope.$emit 'ngrr-dragstart', $event, $element, $index
 							$element.parent().addClass "active-drag-below"
-							#we get the gesture ONCE then continue using it forever till the end
-							@gesture = if $event.gesture.direction is "up" or $event.gesture.direction is "down" then "vertical" else "horizontal"
-							if @gesture isnt "vertical"
-								$event.preventDefault()
-								$event.stopPropagation()
-								$event.gesture.stopPropagation()
-								return false
 							@deltaOffset = $element[0].offsetTop
-							@updateElementClass $element
+							$element.addClass 'dragging'
 							@offset = 0
 							@setMargins $element, '', "-#{$element[0].offsetHeight}px"
 							@updateOffset $event, $element, $index
 							$event.preventDefault()
 						#when a drag event finishes
 						stopevent: ($event, $element, $index) ->
+							$scope.$emit 'ngrr-dragend', $event, $element, $index
 							$element.parent().removeClass "active-drag-below"
 							@resetMargins()
 							@resetPosition $element
@@ -267,6 +253,7 @@ module.directive 'ngRepeatReorder', [
 								obj = collection.splice $index, 1
 								if @offset < 0 then collection.splice $index + @offset + 1, 0, obj[0]
 								else if @offset > 0 then collection.splice $index + @offset - 1, 0, obj[0]
+								$scope.$emit 'ngrr-reordered'
 							#so it shouldn't dissapear during transition
 							$element.removeClass 'dragging'
 							$event.preventDefault()

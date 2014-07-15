@@ -134,6 +134,18 @@ input.form-control, .list-group-item {
 					$scope.names.splice($index, 1);
 				}
 			};
+			
+			$scope.$on('ngrr-dragstart', function(){
+				console.log('Drag Start');
+			});
+			
+			$scope.$on('ngrr-dragend', function(){
+				console.log('Drag End');
+			});
+			
+			$scope.$on('ngrr-reordered', function(){
+				console.log('Reordered');
+			});
 		};
 	</script>
 	
