@@ -26,9 +26,9 @@ module.directive 'ngRepeatReorderHandle', ['$parse', ($parse) ->
 		if attrs.ngRepeatReorderHandle is '' then baseElement = element
 		else baseElement = element.find attrs.ngRepeatReorderHandle
 		if baseElement?
-			bindHammer baseElement, "drag", "reorderFuncs.moveevent($event, $elementRef, $index)"
-			bindHammer baseElement, "dragstart", "reorderFuncs.startevent($event, $elementRef, $index)"
-			bindHammer baseElement, "dragend", "reorderFuncs.stopevent($event, $elementRef, $index)"
+			bindHammer baseElement, "drag", "reorderFuncs.moveevent($event, this, $index)"
+			bindHammer baseElement, "dragstart", "reorderFuncs.startevent($event, this, $index)"
+			bindHammer baseElement, "dragend", "reorderFuncs.stopevent($event, this, $index)"
 ]
 
 uid = ['0', '0', '0']
@@ -222,7 +222,8 @@ module.directive 'ngRepeatReorder', [
 							if beforeIndex >= 0 then (dragBeforeElement = nextBlockOrder[beforeIndex].clone).addClass "dragging-before"
 							if afterIndex < collection.length then (dragAfterElement = nextBlockOrder[afterIndex].clone).addClass "dragging-after"
 						#to catch a move event
-						moveevent: ($event, $element, $index) ->
+						moveevent: ($event, $scope, $index) ->
+							$element = $scope.$elementRef
 							$element.addClass 'dragging'
 							@updateOffset $event, $element, $index
 							$event.preventDefault()
@@ -230,7 +231,8 @@ module.directive 'ngRepeatReorder', [
 							$event.gesture.stopPropagation()
 							return false
 						#used for the start event
-						startevent: ($event, $element, $index) ->
+						startevent: ($event, $scope, $index) ->
+							$element = $scope.$elementRef
 							$scope.$emit 'ngrr-dragstart', $event, $element, $index
 							$element.parent().addClass "active-drag-below"
 							@deltaOffset = $element[0].offsetTop
@@ -240,7 +242,8 @@ module.directive 'ngRepeatReorder', [
 							@updateOffset $event, $element, $index
 							$event.preventDefault()
 						#when a drag event finishes
-						stopevent: ($event, $element, $index) ->
+						stopevent: ($event, $scope, $index) ->
+							$element = $scope.$elementRef
 							$scope.$emit 'ngrr-dragend', $event, $element, $index
 							$element.parent().removeClass "active-drag-below"
 							@resetMargins()

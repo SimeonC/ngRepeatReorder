@@ -38,9 +38,9 @@
             baseElement = element.find(attrs.ngRepeatReorderHandle);
           }
           if (baseElement != null) {
-            bindHammer(baseElement, "drag", "reorderFuncs.moveevent($event, $elementRef, $index)");
-            bindHammer(baseElement, "dragstart", "reorderFuncs.startevent($event, $elementRef, $index)");
-            return bindHammer(baseElement, "dragend", "reorderFuncs.stopevent($event, $elementRef, $index)");
+            bindHammer(baseElement, "drag", "reorderFuncs.moveevent($event, this, $index)");
+            bindHammer(baseElement, "dragstart", "reorderFuncs.startevent($event, this, $index)");
+            return bindHammer(baseElement, "dragend", "reorderFuncs.stopevent($event, this, $index)");
           }
         }
       };
@@ -300,7 +300,8 @@
                   return (dragAfterElement = nextBlockOrder[afterIndex].clone).addClass("dragging-after");
                 }
               },
-              moveevent: function($event, $element, $index) {
+              moveevent: function($event, $scope, $index) {
+                $element = $scope.$elementRef;
                 $element.addClass('dragging');
                 this.updateOffset($event, $element, $index);
                 $event.preventDefault();
@@ -308,7 +309,8 @@
                 $event.gesture.stopPropagation();
                 return false;
               },
-              startevent: function($event, $element, $index) {
+              startevent: function($event, $scope, $index) {
+                $element = $scope.$elementRef;
                 $scope.$emit('ngrr-dragstart', $event, $element, $index);
                 $element.parent().addClass("active-drag-below");
                 this.deltaOffset = $element[0].offsetTop;
@@ -318,8 +320,9 @@
                 this.updateOffset($event, $element, $index);
                 return $event.preventDefault();
               },
-              stopevent: function($event, $element, $index) {
+              stopevent: function($event, $scope, $index) {
                 var obj;
+                $element = $scope.$elementRef;
                 $scope.$emit('ngrr-dragend', $event, $element, $index);
                 $element.parent().removeClass("active-drag-below");
                 this.resetMargins();
