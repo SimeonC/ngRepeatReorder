@@ -1,6 +1,6 @@
 {
   "name": "ngRepeatReorder",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "https://github.com/SimeonC/ngRepeatReorder/graphs/contributors",
   "license": "MIT",
   "main": "./dist/ngRepeatReorder.js",
