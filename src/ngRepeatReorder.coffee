@@ -170,6 +170,7 @@ module.directive 'ngRepeatReorder', [
 						resetMargins: -> @setMargins c.clone for c in nextBlockOrder
 						#this function gets the offset of the mouse and manipulates the margins to reposition everything correctly
 						updateOffset: ($event, $element, $index) ->
+							if not $event or not $event.gesture then return
 							@offset = 0
 							@resetMargins()
 							collection = $scope.$eval(rhs)

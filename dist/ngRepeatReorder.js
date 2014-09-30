@@ -232,6 +232,9 @@
               },
               updateOffset: function($event, $element, $index) {
                 var afterIndex, beforeIndex, delta, directedHeight, gDirection, halfHeight, margin, testDelta, workingDelta, workingElement;
+                if (!$event || !$event.gesture) {
+                  return;
+                }
                 this.offset = 0;
                 this.resetMargins();
                 collection = $scope.$eval(rhs);
