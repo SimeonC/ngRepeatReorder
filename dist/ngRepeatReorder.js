@@ -232,7 +232,7 @@
               },
               updateOffset: function($event, $element, $index) {
                 var afterIndex, beforeIndex, delta, directedHeight, gDirection, halfHeight, margin, testDelta, workingDelta, workingElement;
-                if (!$event || !$event.gesture) {
+                if (!$event || !$event.gesture || nextBlockOrder.length <= 1) {
                   return;
                 }
                 this.offset = 0;
@@ -304,6 +304,9 @@
                 }
               },
               moveevent: function($event, $scope, $index) {
+                if (nextBlockOrder.length <= 1) {
+                  return;
+                }
                 $element = $scope.$elementRef;
                 $element.addClass('dragging');
                 this.updateOffset($event, $element, $index);
@@ -313,6 +316,9 @@
                 return false;
               },
               startevent: function($event, $scope, $index) {
+                if (nextBlockOrder.length <= 1) {
+                  return;
+                }
                 $element = $scope.$elementRef;
                 $scope.$emit('ngrr-dragstart', $event, $element, $index);
                 $element.parent().addClass("active-drag-below");
@@ -325,6 +331,9 @@
               },
               stopevent: function($event, $scope, $index) {
                 var obj;
+                if (nextBlockOrder.length <= 1) {
+                  return;
+                }
                 $element = $scope.$elementRef;
                 $scope.$emit('ngrr-dragend', $event, $element, $index);
                 $element.parent().removeClass("active-drag-below");

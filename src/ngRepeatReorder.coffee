@@ -170,7 +170,7 @@ module.directive 'ngRepeatReorder', [
 						resetMargins: -> @setMargins c.clone for c in nextBlockOrder
 						#this function gets the offset of the mouse and manipulates the margins to reposition everything correctly
 						updateOffset: ($event, $element, $index) ->
-							if not $event or not $event.gesture then return
+							if not $event or not $event.gesture or nextBlockOrder.length <= 1 then return
 							@offset = 0
 							@resetMargins()
 							collection = $scope.$eval(rhs)
@@ -224,6 +224,7 @@ module.directive 'ngRepeatReorder', [
 							if afterIndex < collection.length then (dragAfterElement = nextBlockOrder[afterIndex].clone).addClass "dragging-after"
 						#to catch a move event
 						moveevent: ($event, $scope, $index) ->
+							if nextBlockOrder.length <= 1 then return
 							$element = $scope.$elementRef
 							$element.addClass 'dragging'
 							@updateOffset $event, $element, $index
@@ -233,6 +234,7 @@ module.directive 'ngRepeatReorder', [
 							return false
 						#used for the start event
 						startevent: ($event, $scope, $index) ->
+							if nextBlockOrder.length <= 1 then return
 							$element = $scope.$elementRef
 							$scope.$emit 'ngrr-dragstart', $event, $element, $index
 							$element.parent().addClass "active-drag-below"
@@ -244,6 +246,7 @@ module.directive 'ngRepeatReorder', [
 							$event.preventDefault()
 						#when a drag event finishes
 						stopevent: ($event, $scope, $index) ->
+							if nextBlockOrder.length <= 1 then return
 							$element = $scope.$elementRef
 							$scope.$emit 'ngrr-dragend', $event, $element, $index
 							$element.parent().removeClass "active-drag-below"
