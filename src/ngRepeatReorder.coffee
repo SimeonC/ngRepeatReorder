@@ -127,7 +127,8 @@ module.directive 'ngRepeatReorder', [
 				lastBlockMap = {}
 				
 				#setup styling
-				$element.wrap('<div class="ng-repeat-reorder-parent"></div>');
+				if !(document.getElementsByClassName("ng-repeat-reorder-parent").length)
+					$element.wrap('<div class="ng-repeat-reorder-parent"></div>');
 								
 				$scope.$watchCollection rhs, ngRepeatAction = (collection) ->
 					index = undefined
